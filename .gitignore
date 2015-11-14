@@ -1,0 +1,8 @@
+## Ignore temporary files, build results, and
+
+
+# User-specific files
+log.*
+
+# Build Results of an ATL Project
+*.class
