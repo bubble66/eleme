@@ -55,7 +55,11 @@
 			<interceptor-ref name="basicStack"/>
 			<interceptor-ref name="myAuth"/>
 		</action> 
-				<action name="*" class="org.eleme.qianggou.action.PatchCartsAction">
+		<action name="orders" class="org.eleme.qianggou.action.OrdersAction">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="myAuth"/>
+		</action>
+		<action name="*" class="org.eleme.qianggou.action.PatchCartsAction">
 			<interceptor-ref name="basicStack"/>
 			<interceptor-ref name="myAuth"/>
 		</action>

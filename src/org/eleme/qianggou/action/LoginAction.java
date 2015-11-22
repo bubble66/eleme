@@ -22,10 +22,10 @@ public class LoginAction extends ActionSupport {
 	private LoginService login;
 
 	// 封装请求参数
-	private transient String userName;
+	private transient String username;
 
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	private transient String password;
@@ -39,11 +39,11 @@ public class LoginAction extends ActionSupport {
 		// 创建ActionContext实例
 		ActionContext ctx = ActionContext.getContext();
 		// 调用业务逻辑方法来处理登录请求
-		LoginBo loginBo = login.validLogin(userName, password);
+		LoginBo loginBo = login.validLogin(username, password);
 		if (loginBo != null) {
 			String uuid = UUIDGenerator.getUUID();
 			ctx.getSession().put("access_token", uuid);
-			ctx.getSession().put("userName", userName);
+			ctx.getSession().put("userName", username);
 			loginBo.setAccess_token(uuid);
 			HttpServletResponse response = ServletActionContext.getResponse();
 			try {
