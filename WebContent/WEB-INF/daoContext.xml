@@ -2,9 +2,15 @@
 <!-- 指定Spring配置文件的Schema信息 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
 	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
-	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
 	
 	<!-- 定义数据源Bean，使用C3P0数据源实现 -->
 	<!-- 并设置连接数据库的驱动、URL、用户名、密码，
@@ -12,7 +18,7 @@
 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
 		destroy-method="close"
 		p:driverClass="com.mysql.jdbc.Driver"
-		p:jdbcUrl="jdbc:mysql://localhost:3306/javee"
+		p:jdbcUrl="jdbc:mysql://localhost:3306/eleme"
 		p:user="root"
 		p:password="toor"
 		p:maxPoolSize="200"
@@ -28,13 +34,10 @@
 		<property name="annotatedClasses">
 			<list>
 				<!-- 以下用来列出Hibernate的持久化类 -->
-				<value>org.crazyit.hrsystem.domain.Application</value>
-				<value>org.crazyit.hrsystem.domain.Attend</value>
-				<value>org.crazyit.hrsystem.domain.AttendType</value>
-				<value>org.crazyit.hrsystem.domain.CheckBack</value>
-				<value>org.crazyit.hrsystem.domain.Employee</value>
-				<value>org.crazyit.hrsystem.domain.Manager</value>
-				<value>org.crazyit.hrsystem.domain.Payment</value>
+				<value>org.eleme.qianggou.dal.dom.CartsDo</value>
+				<value>org.eleme.qianggou.dal.dom.FoodDo</value>
+				<value>org.eleme.qianggou.dal.dom.OrderDo</value>
+				<value>org.eleme.qianggou.dal.dom.UserDo</value>
 			</list>
 		</property>
 		<!-- 定义Hibernate的SessionFactory的属性 -->
@@ -52,37 +55,20 @@
 			</value>
 		</property>
 	</bean>
-	
-<!-- 配置DAO组件的模板 -->
-<bean id="daoTemplate" abstract="true" lazy-init="true"
-	p:sessionFactory-ref="sessionFactory"/>
+    
+    <!-- 配置Hibernate的局部事务管理器，使用HibernateTransactionManager类,并注入SessionFactory的引用 -->
+	<bean id="transactionManager" class=
+		"org.springframework.orm.hibernate4.HibernateTransactionManager"
+		p:sessionFactory-ref="sessionFactory"/>	
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+    
+	<!-- 配置DAO组件的模板 -->
+	<bean id="daoTemplate" abstract="true" lazy-init="true"
+		p:sessionFactory-ref="sessionFactory"/>
 
-<bean id="employeeDao"
-	class="org.crazyit.hrsystem.dao.impl.EmployeeDaoHibernate4"
-	parent="daoTemplate"/>
+	<bean id="userDao" class="org.eleme.qianggou.dal.dao.impl.UserDaoImpl"/>
 
-<bean id="managerDao"
-	class="org.crazyit.hrsystem.dao.impl.ManagerDaoHibernate4"
-	parent="daoTemplate"/>
+	<bean id="foodDao" class="org.eleme.qianggou.dal.dao.impl.FoodDaoImpl"/>
 
-<bean id="attendDao"
-	class="org.crazyit.hrsystem.dao.impl.AttendDaoHibernate4"
-	parent="daoTemplate"/>
-
-<bean id="attendTypeDao"
-	class="org.crazyit.hrsystem.dao.impl.AttendTypeDaoHibernate4"
-	parent="daoTemplate"/>
-
-<bean id="appDao"
-	class="org.crazyit.hrsystem.dao.impl.ApplicationDaoHibernate4"
-	parent="daoTemplate"/>
-
-<bean id="checkDao"
-	class="org.crazyit.hrsystem.dao.impl.CheckBackDaoHibernate4"
-	parent="daoTemplate"/>
-
-<bean id="payDao"
-	class="org.crazyit.hrsystem.dao.impl.PaymentDaoHibernate4"
-	parent="daoTemplate"/>
-
+	<bean id="orderDao" class="org.eleme.qianggou.dal.dao.impl.OrderDaoImpl"/>
 </beans>
