@@ -1,8 +1,10 @@
 package eleme_new;
 
 import java.io.Serializable;
-import java.util.UUID;   
+import java.util.UUID;
 
+import org.eleme.qianggou.biz.bo.QueryOrdersBo;
+import org.eleme.qianggou.common.util.SendJson;
 import org.json.JSONObject;
   
 public class UUIDGenerator {   
@@ -52,8 +54,23 @@ public class UUIDGenerator {
         b.setMessage("123");
         JSONObject jsonString = (JSONObject) JSONObject.wrap(ErrorEnum.USER_AUTH_FAIL); 
         System.out.println(jsonString);  
-//        for (int i = 0; i < ss.length; i++) {   
-//            System.out.println("ss["+i+"]====="+ss[i]);   
-//        }   
+        for (int i = 0; i < ss.length; i++) {   
+            //System.out.println("ss["+i+"]====="+ss[i]);   
+        } 
+        
+    	QueryOrdersBo queryOrdersBo = new QueryOrdersBo();
+    	queryOrdersBo.setId("123qwe");
+    	queryOrdersBo.setTotal(11);
+    	queryOrdersBo.setItems(123, 11);
+		String jsonStr = JSONObject.wrap(queryOrdersBo).toString(); 
+        System.out.println(jsonStr);
+
+        try {
+            JSONObject json = new JSONObject("");
+            System.out.println(json.get("hahah"));
+        } catch(Exception e) {
+        	System.out.println(e);
+        }
+
     }   
 } 

@@ -17,7 +17,7 @@ public class Byte2Object {
 			bi.close();
 			oi.close();
 		} catch (Exception e) {
-			System.out.println("translation" + e.getMessage());
+			System.out.println("translation " + e.getMessage() + "bytes: "  + bytes.toString());
 			e.printStackTrace();
 		}
 		return obj;

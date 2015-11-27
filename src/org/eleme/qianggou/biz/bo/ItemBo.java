@@ -3,7 +3,7 @@ package org.eleme.qianggou.biz.bo;
 import java.io.Serializable;
 
 public class ItemBo implements Serializable {
-		private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 10L;
 
 		private int food_id;
 

@@ -6,4 +6,6 @@ import org.eleme.qianggou.dal.dom.FoodDo;
 
 public interface FoodsService {
 	public List<FoodDo> getFoodsList();
+
+	public List<FoodDo> getFoodsListByRedis();
 }

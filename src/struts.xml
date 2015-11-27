@@ -9,59 +9,116 @@
 	<constant name="struts.custom.i18n.resources" value="resource"/>
 	<constant name="struts.i18n.encoding" value="UTF-8"/>
 	<constant name="struts.devMode" value="true"/>
-	<package name="default" extends="json-default">
+	
+	<package name="adminOrder" extends="json-default" namespace="/admin">
 		<interceptors>
 			<!-- 配置权限检查拦截器 -->
 			<interceptor name="myAuth"	
 			class="org.eleme.qianggou.action.authority.AuthorityInterceptor"/>
-			<!-- 配置经理的默认的拦截器栈 -->
-			<interceptor-stack name="authStack">
+			<interceptor name="myTime"	
+			class="org.eleme.qianggou.action.authority.TimeInterceptor"/>
+			<!-- 配置经拦截器栈 -->
+			<interceptor-stack name="myStack">
 				<interceptor-ref name="defaultStack"/>
+				<interceptor-ref name="myTime"/>
+				<interceptor-ref name="myAuth"/>
+			</interceptor-stack>
+		</interceptors>
+		
+		<!-- 定义全局Result映射 -->
+		<global-results>
+			<result name="success"></result>
+			<result name="error"></result>
+		</global-results>
+		<!-- 定义全局异常映射 -->
+		<global-exception-mappings>
+			<!-- 当Action中遇到Exception异常时，
+				系统将转入name为root的结果中 -->
+			<exception-mapping exception="java.lang.Exception" 
+				result="error"/>
+		</global-exception-mappings>
+		<action name="orders" class="org.eleme.qianggou.action.AdminOrdersAction">
+			<interceptor-ref name="myStack"/>
+		</action>
+	</package>
+
+	<package name="patchCart" extends="json-default" namespace="/carts">
+		<interceptors>
+			<!-- 配置权限检查拦截器 -->
+			<interceptor name="myAuth"	
+			class="org.eleme.qianggou.action.authority.AuthorityInterceptor"/>
+			<interceptor name="myTime"	
+			class="org.eleme.qianggou.action.authority.TimeInterceptor"/>
+			<!-- 配置经理的默认的拦截器栈 -->
+			<interceptor-stack name="myStack">
+				<interceptor-ref name="defaultStack"/>
+				<interceptor-ref name="myTime"/>
 				<interceptor-ref name="myAuth"/>
 			</interceptor-stack>
 		</interceptors>
 
 		<!-- 定义全局Result映射 -->
 		<global-results>
-			<!-- 定义sql、root两个异常对应的视图页 -->
-			<result name="success" type="json">
-				<param name="noCache">true</param>
-				<param name="contentType">text/html</param>
-			</result>
 			<result name="error"></result>
+			<result name="success"></result>
 		</global-results>
 		<!-- 定义全局异常映射 -->
 		<global-exception-mappings>
-			<!-- 当Action中遇到HrException异常时，
-				系统将转入name为business的结果中 -->
-			<exception-mapping exception="org.eleme.qianggou.common.exception.MyException"
-				result="error"/>
 			<!-- 当Action中遇到Exception异常时，
 				系统将转入name为root的结果中 -->
 			<exception-mapping exception="java.lang.Exception" 
 				result="error"/>
 		</global-exception-mappings>
 
-<!--============================下面是Action========================-->
+		<!--============================下面是Action========================-->
+		<action name="*" class="org.eleme.qianggou.action.PatchCartsAction">
+			<interceptor-ref name="myStack"/>
+		</action>
+	</package>
+	
+	<package name="user" extends="json-default" namespace="">
+		<interceptors>
+			<!-- 配置权限检查拦截器 -->
+			<interceptor name="myAuth"	
+			class="org.eleme.qianggou.action.authority.AuthorityInterceptor"/>
+			<interceptor name="myTime"	
+			class="org.eleme.qianggou.action.authority.TimeInterceptor"/>
+			<!-- 配置经理的默认的拦截器栈 -->
+			<interceptor-stack name="myStack">
+				<interceptor-ref name="defaultStack"/>
+				<interceptor-ref name="myTime"/>
+				<interceptor-ref name="myAuth"/>
+			</interceptor-stack>
+		</interceptors>
+
+		<!-- 定义全局Result映射 -->
+		<global-results>
+			<result name="error"></result>
+			<result name="success"></result>
+		</global-results>
+		<!-- 定义全局异常映射 -->
+		<global-exception-mappings>
+			<!-- 当Action中遇到Exception异常时，
+				系统将转入name为root的结果中 -->
+			<exception-mapping exception="java.lang.Exception" 
+				result="error"/>
+		</global-exception-mappings>
+
+		<!--============================下面是Action========================-->
 		<!-- 定义处理登录系统的的Action -->
-		<action name="login" class="org.eleme.qianggou.action.LoginAction"/>
+		<action name="login" class="org.eleme.qianggou.action.LoginAction">
+		</action>
 		<!-- 定义处理登录系统的的Action -->
 		<action name="foods" class="org.eleme.qianggou.action.FoodsAction">
-			<interceptor-ref name="basicStack"/>
-			<interceptor-ref name="myAuth"/>
+			<interceptor-ref name="myStack"/>
 		</action>
 		<!-- 定义处理登录系统的的Action -->
 		<action name="carts" class="org.eleme.qianggou.action.CartsAction">
-			<interceptor-ref name="basicStack"/>
-			<interceptor-ref name="myAuth"/>
-		</action> 
-		<action name="orders" class="org.eleme.qianggou.action.OrdersAction">
-			<interceptor-ref name="basicStack"/>
-			<interceptor-ref name="myAuth"/>
+			<interceptor-ref name="myStack"/>
 		</action>
-		<action name="*" class="org.eleme.qianggou.action.PatchCartsAction">
-			<interceptor-ref name="basicStack"/>
-			<interceptor-ref name="myAuth"/>
+		<action name="orders" class="org.eleme.qianggou.action.OrdersAction">
+			<interceptor-ref name="myStack"/>
 		</action>
 	</package>
+	
 </struts>

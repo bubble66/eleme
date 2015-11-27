@@ -35,18 +35,19 @@ public class FoodsAction  extends ActionSupport {
 	// 处理用户请求
 		public String execute() throws Exception {
 			// 调用业务逻辑方法来处理登录请求
+			//List<FoodDo> foodsList = foodsService.getFoodsListByRedis();
 			List<FoodDo> foodsList = foodsService.getFoodsList();
 			if (foodsList != null) {
 				HttpServletResponse response = ServletActionContext.getResponse();
 				SendJson.sendObjectByJson(foodsList, 
 						response, HttpServletResponse.SC_OK);
-				return SUCCESS;
+				return null;
 			}
 			else {
 				HttpServletResponse response = ServletActionContext.getResponse();
 				SendJson.sendObjectByJson(ErrorEnum.SQL_ERROR, 
 						response, HttpServletResponse.SC_FORBIDDEN);
-				return ERROR;
+				return null;
 			}
 		}
 }

@@ -33,25 +33,24 @@ public class CartsAction extends ActionSupport {
 	
 	// 处理用户请求
 		public String execute() throws Exception {
-
 			// 创建ActionContext实例
 			ActionContext ctx = ActionContext.getContext();
 			// 获取HttpSession中的level属性
-			String userId = (String) ctx.getSession().get("userName");
+			String userName = (String) ctx.getSession().get("userName");
 			// 调用业务逻辑方法来处理登录请求
-			String cartsId = cartsService.creatCarts(userId);
+			String cartsId = cartsService.creatCarts(userName);
 			if (cartsId != null) {
 				CartsBo cartsBo = new CartsBo(cartsId);
 				HttpServletResponse response = ServletActionContext.getResponse();
 				SendJson.sendObjectByJson(cartsBo, 
 						response, HttpServletResponse.SC_OK);
-				return SUCCESS;
+				return null;
 			}
 			else {
 				HttpServletResponse response = ServletActionContext.getResponse();
 				SendJson.sendObjectByJson(ErrorEnum.SQL_ERROR, 
 						response, HttpServletResponse.SC_FORBIDDEN);
-				return ERROR;
+				return null;
 			}
 		}
 }

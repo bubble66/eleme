@@ -29,5 +29,15 @@ public class LoginServiceImpl implements LoginService {
 		} else
 			return null;
 	}
+	
+	public UserDo validLoginDo(String userName, String password) {
+		UserDo userDo = new UserDo(null, userName, password);
+		List<UserDo> userList = userDao.findUser(userDo);
+		if (userList != null && userList.size() > 0) {
+
+			return userList.get(0);
+		} else
+			return null;
+	}
 
 }

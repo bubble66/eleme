@@ -2,6 +2,7 @@ package eleme_new;
 
 import java.util.UUID;
 
+import org.eleme.qianggou.biz.bo.QueryOrdersBo;
 import org.json.JSONObject;
 
 public class JsonTest { 
@@ -26,6 +27,12 @@ public class JsonTest {
   
     public static void main(String[] args) {   
 		//String jsonString = JSONObject.valueToString(ErrorEnum.USER_AUTH_FAIL); 
-        //System.out.println(jsonString);     
+        //System.out.println(jsonString);    
+    	QueryOrdersBo queryOrdersBo = new QueryOrdersBo();
+    	queryOrdersBo.setId("123qwe");
+    	queryOrdersBo.setTotal(11);
+    	queryOrdersBo.setItems(123, 11);
+		String jsonString = JSONObject.valueToString(queryOrdersBo); 
+        System.out.println(jsonString);  
     }  
 }

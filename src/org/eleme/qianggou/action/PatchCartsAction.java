@@ -1,5 +1,6 @@
 package org.eleme.qianggou.action;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -9,6 +10,7 @@ import org.eleme.qianggou.biz.service.CartsService;
 import org.eleme.qianggou.common.enums.ErrorEnum;
 import org.eleme.qianggou.common.enums.MessageStatseEnum;
 import org.eleme.qianggou.common.util.SendJson;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -18,6 +20,10 @@ import com.opensymphony.xwork2.ActionSupport;
 public class PatchCartsAction extends ActionSupport {
 	private static final long serialVersionUID = 1L;
 
+	private static final String FOOD_ID = "food_id";
+	
+	private static final String COUNT = "count";
+	
 	private static final int CARTS_ID_LENGTH = 32;
 
 	private String access_token;
@@ -33,34 +39,57 @@ public class PatchCartsAction extends ActionSupport {
 		// 创建ActionContext实例
 		ActionContext ctx = ActionContext.getContext();
 		// 获取HttpSession中的level属性
-		String userId = (String) ctx.getSession().get("userName");
+		String userName = (String) ctx.getSession().get("userName");
 		HttpServletRequest request = (HttpServletRequest) ctx
 				.get(org.apache.struts2.StrutsStatics.HTTP_REQUEST);
 		String cartId = request.getRequestURI().substring(
 				request.getRequestURI().lastIndexOf("/")+1);
-		if (cartId.length() == CARTS_ID_LENGTH) {
-			// 调用业务逻辑方法来处理登录请求
-			PatchCartsQueryParam param = new PatchCartsQueryParam();
-			param.setCartId(cartId);
-			param.setUserId(userId);
-			param.setCount(count);
-			param.setFoodId(food_id);
-			ErrorEnum errorEnum = cartsService.patchCarts(param);
-			if (errorEnum == null) {
-				HttpServletResponse response = ServletActionContext
-						.getResponse();
-				SendJson.sendObjectByJson(null, response,
-						HttpServletResponse.SC_NO_CONTENT);
-				return SUCCESS;
-			} else {
-				HttpServletResponse response = ServletActionContext.getResponse();
-				SendJson.sendObjectByJson(MessageStatseEnum.getEnumByMessage(errorEnum), response);
-				return ERROR;
+		
+		// 调用业务逻辑方法来处理登录请求
+		try {
+			ServletInputStream inputStream = ServletActionContext.getRequest()
+					.getInputStream();
+			JSONObject json = SendJson.JsonStrTrim(inputStream);
+			if(json == null) {
+				SendJson.sendObjectByJson(ErrorEnum.REQUEST_EMPTY, ServletActionContext.getResponse(),
+						HttpServletResponse.SC_BAD_REQUEST);
+				return null;
 			}
+			if (json.has(FOOD_ID))
+				food_id = json.getInt(FOOD_ID);
+			if (json.has(COUNT))
+				count = json.getInt(COUNT);
+		} catch (Exception e) {
+			SendJson.sendObjectByJson(ErrorEnum.REQUEST_MALFORMED, ServletActionContext.getResponse(),
+					HttpServletResponse.SC_BAD_REQUEST);
+			return null;
 		}
-		HttpServletResponse response = ServletActionContext.getResponse();
-		SendJson.sendObjectByJson(MessageStatseEnum.getEnumByMessage(ErrorEnum.SQL_ERROR), response);
-		return ERROR;
+		try {
+			if (cartId.length() == CARTS_ID_LENGTH) {
+				// 调用业务逻辑方法来处理登录请求
+				PatchCartsQueryParam param = new PatchCartsQueryParam();
+				param.setCartId(cartId);
+				param.setUserName(userName);
+				param.setCount(count);
+				param.setFoodId(food_id);
+				ErrorEnum errorEnum = cartsService.patchCarts(param);
+				if (errorEnum == null) {
+					HttpServletResponse response = ServletActionContext.getResponse();
+					SendJson.sendObjectByJson(null, response,
+							HttpServletResponse.SC_NO_CONTENT);
+					return null;
+				} else {
+					
+					SendJson.sendObjectByJson(MessageStatseEnum.getEnumByMessage(errorEnum), ServletActionContext.getResponse());
+					return null;
+				}
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		SendJson.sendObjectByJson(MessageStatseEnum.getEnumByMessage(ErrorEnum.CART_NOT_FOUND), ServletActionContext.getResponse());
+		return null;
 
 	}
 

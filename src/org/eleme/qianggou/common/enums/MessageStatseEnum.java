@@ -5,7 +5,9 @@ import javax.servlet.http.HttpServletResponse;
 public enum MessageStatseEnum {
 	CART_NOT_FOUND(ErrorEnum.CART_NOT_FOUND, HttpServletResponse.SC_NOT_FOUND),
 	
-	FOOD_NOT_FOUND(ErrorEnum.FOOD_NOT_FOUND, HttpServletResponse.SC_FORBIDDEN),
+	FOOD_NOT_FOUND(ErrorEnum.FOOD_NOT_FOUND, HttpServletResponse.SC_NOT_FOUND),
+	
+	CART_EMPTY(ErrorEnum.CART_EMPTY, HttpServletResponse.SC_FORBIDDEN),
 	
 	FOOD_OUT_OF_LIMIT(ErrorEnum.FOOD_OUT_OF_LIMIT, HttpServletResponse.SC_FORBIDDEN),
 	

@@ -15,7 +15,7 @@ public class OrdersDo implements Serializable {
 
 	private String ordersId;
 
-	private String userId;
+	private Long userId;
 
 	private List<OrderDo> itemList;
 	
@@ -27,16 +27,16 @@ public class OrdersDo implements Serializable {
 	}
 
 	// 初始化全部成员变量的构造器
-	public OrdersDo(String userId, List<OrderDo> itemList) {
+	public OrdersDo(Long userId, List<OrderDo> itemList) {
 		this.userId = userId;
 		this.itemList = itemList;
 	}
 
-	public String getUserId() {
+	public Long getUserId() {
 		return userId;
 	}
 
-	public void setUserId(String userId) {
+	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
 

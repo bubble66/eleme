@@ -1,5 +1,7 @@
 package org.eleme.qianggou.biz.service.impl;
 
+import java.util.List;
+
 import org.eleme.qianggou.biz.param.PatchCartsQueryParam;
 import org.eleme.qianggou.biz.service.CartsService;
 import org.eleme.qianggou.common.enums.ErrorEnum;
@@ -13,46 +15,64 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
 @Service("cartsService")
-public class CartsServiceImpl implements CartsService{
+public class CartsServiceImpl implements CartsService {
 
 	@Override
-	public String creatCarts(String userId) {
+	public String creatCarts(String userName) {
 		String cartsId = UUIDGenerator.getUUID();
-		Jedis jedis = RedisClient.getJedis();
 		CartsDo cartsDo = new CartsDo();
-		cartsDo.setUserId(userId);
-		jedis.set(cartsId.getBytes(), Byte2Object.ObjectToByte(cartsDo));
+		cartsDo.setUserName(userName);
+		Jedis jedis = RedisClient.getJedis();
+		jedis.set(("cartsId-" + cartsId).getBytes(),
+				Byte2Object.ObjectToByte(cartsDo));
+		RedisClient.closeJedis(jedis);
 		return cartsId;
 	}
 
 	@Override
 	public ErrorEnum patchCarts(PatchCartsQueryParam param) {
-		Jedis jedis = RedisClient.getJedis();
-		String cartId = param.getCartId();
-		byte[] bytes = jedis.get(cartId.getBytes());
-		if(bytes == null) 
-			return ErrorEnum.CART_NOT_FOUND;
-		CartsDo cartsDo = (CartsDo) Byte2Object.ByteToObject(bytes);
-		String userId = cartsDo.getUserId();
-		if(!userId.equals(param.getUserId()))
-			return ErrorEnum.NOT_AUTHORIZED_TO_ACCESS_CART;
-		if(!jedis.exists(String.valueOf(param.getFoodId())))
-			return ErrorEnum.FOOD_NOT_FOUND;
-		if(cartsDo.getCount() + param.getCount() > CartsDo.MAX_COUNT_FOOD)
-			return ErrorEnum.FOOD_OUT_OF_LIMIT;
-		long count = 0L - param.getCount();
-		if(jedis.hincrBy(String.valueOf(param.getFoodId()), "stock", count) < 0) {
-			jedis.hincrBy(String.valueOf(param.getFoodId()), "stock", -count);
-			return ErrorEnum.FOOD_OUT_OF_STOCK;
+		Jedis jedis = null;
+		try {
+			jedis = RedisClient.getJedis();
+			String cartId = param.getCartId();
+			byte[] bytes = jedis.get(("cartsId-" + cartId).getBytes());
+			if (bytes == null) {
+				return ErrorEnum.CART_NOT_FOUND;
+			}
+			CartsDo cartsDo = (CartsDo) Byte2Object.ByteToObject(bytes);
+			String userName = cartsDo.getUserName();
+			if (!userName.equals(param.getUserName())) {
+				return ErrorEnum.NOT_AUTHORIZED_TO_ACCESS_CART;
+			}
+			if (cartsDo.getCount() + param.getCount() > CartsDo.MAX_COUNT_FOOD) {
+				return ErrorEnum.FOOD_OUT_OF_LIMIT;
+			}
+			List<String> foodInfoList = jedis.hmget(
+					"FoodTable-" + param.getFoodId(), "stock", "price");
+			if (foodInfoList == null || foodInfoList.get(0) == null
+					|| foodInfoList.get(1) == null) {
+				return ErrorEnum.FOOD_NOT_FOUND;
+			}
+			Integer stock = Integer.parseInt(foodInfoList.get(0));
+			long count = param.getCount();
+			if (stock - count < 0) {
+				return ErrorEnum.FOOD_OUT_OF_STOCK;
+			}
+			int price = Integer.parseInt(foodInfoList.get(1));
+			CartsFoodDo foodDo = new CartsFoodDo();
+			foodDo.setCount(param.getCount());
+			foodDo.setId(param.getFoodId());
+			foodDo.setPrice(price);
+			if (cartsDo.addFoodList(foodDo))
+				jedis.set(("cartsId-" + cartId).getBytes(),
+						Byte2Object.ObjectToByte(cartsDo));
+			return null;
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} finally {
+			RedisClient.closeJedis(jedis);
 		}
-		int price = Integer.parseInt(jedis.hget(String.valueOf(param.getFoodId()), "price"));
-		CartsFoodDo foodDo = new CartsFoodDo();
-		foodDo.setCount(param.getCount());
-		foodDo.setId(param.getFoodId());
-		foodDo.setPrice(price);
-		if(cartsDo.addFoodList(foodDo))
-			jedis.set(cartId.getBytes(), Byte2Object.ObjectToByte(cartsDo));
-		return null;
+		return ErrorEnum.CART_NOT_FOUND;
 	}
 
 }

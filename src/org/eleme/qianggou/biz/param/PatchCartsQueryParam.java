@@ -2,7 +2,7 @@ package org.eleme.qianggou.biz.param;
 
 public class PatchCartsQueryParam {
 	
-	private String userId;
+	private String userName;
 	
 	private String cartId;
 	
@@ -10,12 +10,6 @@ public class PatchCartsQueryParam {
 	
 	private int count;
 	
-	public String getUserId() {
-		return userId;
-	}
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
 	public String getCartId() {
 		return cartId;
 	}
@@ -33,6 +27,12 @@ public class PatchCartsQueryParam {
 	}
 	public void setCount(int count) {
 		this.count = count;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 }

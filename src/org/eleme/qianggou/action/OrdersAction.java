@@ -1,5 +1,9 @@
 package org.eleme.qianggou.action;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts2.ServletActionContext;
@@ -10,6 +14,7 @@ import org.eleme.qianggou.biz.service.OrdersService;
 import org.eleme.qianggou.common.enums.ErrorEnum;
 import org.eleme.qianggou.common.enums.MessageStatseEnum;
 import org.eleme.qianggou.common.util.SendJson;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -21,7 +26,11 @@ public class OrdersAction extends ActionSupport {
 
 	private static final int CARTS_ID_LENGTH = 32;
 
+	private static final String CART_ID = "cart_id";
+
 	private String cart_id;
+	
+	private String access_token;
 
 	public void setCart_id(String cart_id) {
 		this.cart_id = cart_id;
@@ -37,7 +46,7 @@ public class OrdersAction extends ActionSupport {
 		 * Struts2判断GET/POST请求
 		 */
 		String method = ServletActionContext.getRequest().getMethod();
-		System.out.println(method);
+		// System.out.println(method);
 		if (method.equals("POST")) {
 			return post();
 		} else {
@@ -48,60 +57,70 @@ public class OrdersAction extends ActionSupport {
 	private String post() throws Exception {
 		// 创建ActionContext实例
 		ActionContext ctx = ActionContext.getContext();
-		String userId = (String) ctx.getSession().get("userName");
-
+		String userName = (String) ctx.getSession().get("userName");
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			ServletInputStream inputStream = ServletActionContext.getRequest()
+					.getInputStream();
+			JSONObject json = SendJson.JsonStrTrim(inputStream);
+			if (json == null) {
+				SendJson.sendObjectByJson(ErrorEnum.REQUEST_EMPTY, response,
+						HttpServletResponse.SC_BAD_REQUEST);
+				return null;
+			}
+			if (json.has(CART_ID))
+				cart_id = json.getString(CART_ID);
+		} catch (Exception e) {
+			SendJson.sendObjectByJson(ErrorEnum.REQUEST_MALFORMED, response,
+					HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
 		if (cart_id.length() == CARTS_ID_LENGTH) {
 			// 调用业务逻辑方法来处理登录请求
 			OrdersQueryParam param = new OrdersQueryParam();
-			param.setUserId(userId);
+			param.setUserName(userName);
 			param.setCartId(cart_id);
 			Object resultObject = ordersService.orders(param);
 			if (resultObject != null && resultObject instanceof OrdersBo) {
-				HttpServletResponse response = ServletActionContext
-						.getResponse();
 				SendJson.sendObjectByJson(resultObject, response,
 						HttpServletResponse.SC_OK);
-				return SUCCESS;
+				return null;
 			} else if (resultObject != null
 					&& resultObject instanceof ErrorEnum) {
-				HttpServletResponse response = ServletActionContext
-						.getResponse();
+
 				SendJson.sendObjectByJson(MessageStatseEnum
 						.getEnumByMessage((ErrorEnum) resultObject), response);
-				return ERROR;
+				return null;
 			}
 		}
-		HttpServletResponse response = ServletActionContext.getResponse();
 		SendJson.sendObjectByJson(
 				MessageStatseEnum.getEnumByMessage(ErrorEnum.CART_NOT_FOUND),
 				response);
-		return ERROR;
+		return null;
 	}
 
 	private String get() throws Exception {
 		// 创建ActionContext实例
 		ActionContext ctx = ActionContext.getContext();
-		String userId = (String) ctx.getSession().get("userName");
+		String userName = (String) ctx.getSession().get("userName");
 
 		// 调用业务逻辑方法来处理登录请求
 		OrdersQueryParam param = new OrdersQueryParam();
-		param.setUserId(userId);
-		Object resultObject = ordersService.findOrders(param);
-		if (resultObject != null && resultObject instanceof QueryOrdersBo) {
-			HttpServletResponse response = ServletActionContext.getResponse();
-			SendJson.sendObjectByJson(resultObject, response,
-					HttpServletResponse.SC_OK);
-			return SUCCESS;
-		} else if (resultObject != null && resultObject instanceof ErrorEnum) {
-			HttpServletResponse response = ServletActionContext.getResponse();
-			SendJson.sendObjectByJson(MessageStatseEnum
-					.getEnumByMessage((ErrorEnum) resultObject), response);
-			return ERROR;
-		}
+		param.setUserName(userName);
+		List<QueryOrdersBo> resultList = ordersService.findOrders(param);
 		HttpServletResponse response = ServletActionContext.getResponse();
-		SendJson.sendObjectByJson(
-				MessageStatseEnum.getEnumByMessage(ErrorEnum.CART_NOT_FOUND),
-				response);
-		return ERROR;
+		if(resultList == null)
+			resultList = new ArrayList<QueryOrdersBo>(0);
+		SendJson.sendObjectByJson(resultList, response,
+				HttpServletResponse.SC_OK);
+		return null;
+	}
+
+	public String getAccess_token() {
+		return access_token;
+	}
+
+	public void setAccess_token(String access_token) {
+		this.access_token = access_token;
 	}
 }
